@@ -59,9 +59,8 @@ RUN wget -nv -O ${MODEL_DIR}/512x512_diffusion_uncond_finetune_008100.pt \
  && wget -nv -O ${MODEL_DIR}/dpt_large-midas-2f21e586.pt \
         https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
 
-# RAFT weights — download_models.sh pulls from Google Drive which is blocked in CI.
 RUN wget -nv -O RAFT/models/raft-things.pth \
-        "https://huggingface.co/Wuvin/Unique3D/resolve/main/raft-things.pth"
+        "https://github.com/e-dream-ai/gpu-container-discodiffusion/releases/download/v1.0/raft-things.pth"
 
 RUN python -c "import clip; clip.load('ViT-B/32', download_root='/disco/models/clip'); clip.load('RN50', download_root='/disco/models/clip')"
 
@@ -76,9 +75,7 @@ RUN chmod +x /workspace/entrypoint.sh
 ENV DISCO_OUTPUT_DIR=/workspace/output \
     DISCO_MODEL_DIR=/disco/models \
     DISCO_RAFT_PATH=/disco/RAFT/models/raft-things.pth \
-    CLIP_DOWNLOAD_ROOT=/disco/models/clip \
-    BACKEND_URL="" \
-    BACKEND_API_KEY=""
+    CLIP_DOWNLOAD_ROOT=/disco/models/clip
 
 RUN mkdir -p ${DISCO_OUTPUT_DIR}
 

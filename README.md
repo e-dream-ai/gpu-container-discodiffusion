@@ -8,12 +8,12 @@ gandamu, zippy, and the Disco Diffusion community.
 
 Three animation modes:
 
-| `animation_mode` | Input | Output |
-|---|---|---|
-| `None` | text prompt | single image |
-| `2D` | text prompt + keyframed transforms | mp4 |
-| `3D` | text prompt + keyframed transforms + MiDaS depth | mp4 |
-| `Video Input` | text prompt + source video | mp4 stylized via optical-flow warping |
+| `animation_mode` | Input                                            | Output                                |
+| ---------------- | ------------------------------------------------ | ------------------------------------- |
+| `None`           | text prompt                                      | single image                          |
+| `2D`             | text prompt + keyframed transforms               | mp4                                   |
+| `3D`             | text prompt + keyframed transforms + MiDaS depth | mp4                                   |
+| `Video Input`    | text prompt + source video                       | mp4 stylized via optical-flow warping |
 
 ## Build
 
@@ -24,7 +24,7 @@ docker push <your-registry>/gpu-container-discodiffusion:latest
 
 The first build downloads ~4 GB of model weights (512px and 256px diffusion
 checkpoints, secondary denoiser, MiDaS DPT-Large, RAFT, plus ViT-B/32 and RN50
-CLIP encoders). Expect ~30 minutes and ~12 GB on the final image.
+CLIP encoders).
 
 ## Run locally
 
@@ -70,11 +70,11 @@ base64-encoded in the response.
 
 ```json
 {
-  "status": "success",
-  "video": "https://...",
-  "seed": 1337,
-  "frames": 60,
-  "batch_num": 0
+    "status": "success",
+    "video": "https://...",
+    "seed": 1337,
+    "frames": 60,
+    "batch_num": 0
 }
 ```
 
@@ -83,8 +83,5 @@ base64-encoded in the response.
 - The diffusion model is the original Katherine Crowson 512×512 fine-tune.
   Outputs have a recognizable painterly/psychedelic aesthetic. For modern AI
   video, prefer LTX or Wan.
-- A single 512×512 image at 250 steps takes ~10 minutes on an A100.
 - Video Input mode requires RAFT optical-flow generation as a preprocessing
   step (~1 s/frame at 720p).
-- The original Colab notebook (`IMPORTANTTTTTTTT.ipynb`) lives at the
-  monorepo root for reference.
