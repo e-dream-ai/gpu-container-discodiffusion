@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.venv/
+venv/
+.env
+.DS_Store
+output/
+models_cache/
+*.mp4
+*.png
+!test_input*.png

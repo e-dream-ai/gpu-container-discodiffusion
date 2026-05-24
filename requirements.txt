@@ -1,0 +1,17 @@
+numpy==1.24.4
+pandas==2.0.3
+scipy==1.10.1
+matplotlib==3.7.2
+opencv-python-headless==4.8.1.78
+Pillow==10.0.1
+regex
+ftfy
+einops==0.6.1
+timm==0.6.13
+lpips==0.1.4
+pytorch-lightning==1.9.5
+omegaconf==2.3.0
+requests
+tqdm
+runpod==1.6.2
+-e git+https://github.com/e-dream-ai/python-api.git@main#egg=edream_sdk

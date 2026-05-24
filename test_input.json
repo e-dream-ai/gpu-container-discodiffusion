@@ -1,0 +1,27 @@
+{
+  "input": {
+    "settings": {
+      "batch_name": "DiscoTest",
+      "diffusion_model": "512x512_diffusion_uncond_finetune_008100",
+      "diffusion_sampling_mode": "ddim",
+      "use_secondary_model": false,
+      "width": 512,
+      "height": 512,
+      "steps": 50,
+      "skip_steps": 10,
+      "clip_guidance_scale": 5000,
+      "tv_scale": 0,
+      "range_scale": 150,
+      "sat_scale": 0,
+      "cutn_batches": 2,
+      "clip_vit_b32": true,
+      "clip_rn50": true,
+      "animation_mode": "None",
+      "n_batches": 1,
+      "seed": 1337,
+      "text_prompts": {
+        "0": ["A beautiful painting of a starry night sky over a calm ocean, trending on artstation."]
+      }
+    }
+  }
+}
