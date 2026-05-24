@@ -51,13 +51,16 @@ ENV MODEL_DIR=/disco/models
 RUN mkdir -p ${MODEL_DIR} RAFT/models
 
 RUN wget -nv -O ${MODEL_DIR}/512x512_diffusion_uncond_finetune_008100.pt \
-        https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt \
+        "https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt" \
+ && echo "9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648  ${MODEL_DIR}/512x512_diffusion_uncond_finetune_008100.pt" | sha256sum -c \
  && wget -nv -O ${MODEL_DIR}/256x256_diffusion_uncond.pt \
-        https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt \
+        "https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt" \
+ && echo "983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a  ${MODEL_DIR}/256x256_diffusion_uncond.pt" | sha256sum -c \
  && wget -nv -O ${MODEL_DIR}/secondary_model_imagenet_2.pth \
-        https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth \
+        "https://huggingface.co/spaces/huggi/secondary_model_imagenet_2.pth/resolve/main/secondary_model_imagenet_2.pth" \
+ && echo "983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a  ${MODEL_DIR}/secondary_model_imagenet_2.pth" | sha256sum -c \
  && wget -nv -O ${MODEL_DIR}/dpt_large-midas-2f21e586.pt \
-        https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
+        "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt"
 
 RUN wget -nv -O RAFT/models/raft-things.pth \
         "https://github.com/e-dream-ai/gpu-container-discodiffusion/releases/download/v1.0/raft-things.pth"
