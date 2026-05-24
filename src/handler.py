@@ -20,9 +20,6 @@ _PARENT = os.path.dirname(_HERE)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
 
-from src.config import DiscoConfig
-from src.pipeline import run_job
-
 from edream_sdk.client import create_edream_client
 from edream_sdk.types.file_upload_types import FileType
 
@@ -94,12 +91,14 @@ def handler(job: dict) -> dict:
     try:
         _resolve_video_input(settings)
         _resolve_init_image(settings)
+        from src.config import DiscoConfig
         cfg = DiscoConfig.from_dict(settings)
     except Exception as exc:
         traceback.print_exc()
         return {"error": f"Bad config: {exc}"}
 
     try:
+        from src.pipeline import run_job
         result = run_job(cfg)
     except Exception as exc:
         traceback.print_exc()
