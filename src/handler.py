@@ -72,9 +72,12 @@ def _upload_output(output_path: str, batch_name: str) -> dict:
         FileType.DREAM,
         {"name": batch_name},
     )
+    dream_uuid = dream.get("uuid")
+    dream_detail = edream_client.get_dream(uuid=dream_uuid) if dream_uuid else {}
+    r2_url = (dream_detail.get("original_video") or dream_detail.get("video")) if dream_detail else None
     return {
-        "dream_uuid": dream.get("uuid"),
-        "r2_url": dream.get("original_video") or dream.get("video"),
+        "dream_uuid": dream_uuid,
+        "r2_url": r2_url,
     }
 
 
