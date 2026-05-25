@@ -14,4 +14,4 @@ omegaconf==2.3.0
 requests
 tqdm
 runpod==1.6.2
--e git+https://github.com/e-dream-ai/python-api.git@main#egg=edream_sdk
+boto3>=1.34.0

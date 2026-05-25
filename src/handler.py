@@ -4,10 +4,13 @@ import os
 import sys
 import tempfile
 import traceback
-import urllib.request
+import uuid
 from typing import Any
 
+import boto3
+import requests
 import runpod
+from botocore.config import Config as BotoConfig
 
 for path in ("/disco", "/disco/CLIP", "/disco/guided-diffusion",
              "/disco/ResizeRight", "/disco/pytorch3d-lite",
@@ -20,41 +23,54 @@ _PARENT = os.path.dirname(_HERE)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
 
-from edream_sdk.client import create_edream_client
-from edream_sdk.types.file_upload_types import FileType
-
-BACKEND_URL = os.environ.get("BACKEND_URL")
-BACKEND_API_KEY = os.environ.get("BACKEND_API_KEY")
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
-edream_client = None
-if BACKEND_URL and BACKEND_API_KEY:
-    edream_client = create_edream_client(backend_url=BACKEND_URL, api_key=BACKEND_API_KEY)
+
+def _upload_to_r2(job_id: str, file_path: str) -> str:
+    bucket = os.environ["R2_BUCKET_NAME"]
+    endpoint_url = os.environ["R2_ENDPOINT_URL"]
+    access_key = os.environ["R2_ACCESS_KEY_ID"]
+    secret_key = os.environ["R2_SECRET_ACCESS_KEY"]
+    upload_dir = os.environ.get("R2_UPLOAD_DIRECTORY", "video-outputs").strip("/")
+    expires_in = int(os.environ.get("R2_PRESIGNED_EXPIRY", "86400"))
+
+    ext = os.path.splitext(file_path)[1].lower() or ".png"
+    object_key = f"{upload_dir}/{job_id}{ext}" if upload_dir else f"{job_id}{ext}"
+    content_types = {".mp4": "video/mp4", ".png": "image/png", ".jpg": "image/jpeg"}
+
+    s3 = boto3.client("s3", endpoint_url=endpoint_url,
+                      aws_access_key_id=access_key, aws_secret_access_key=secret_key,
+                      region_name="auto", config=BotoConfig(s3={"addressing_style": "path"}))
+
+    with open(file_path, "rb") as f:
+        s3.upload_fileobj(f, bucket, object_key,
+                          ExtraArgs={"ContentType": content_types.get(ext, "application/octet-stream")})
+
+    try:
+        return s3.generate_presigned_url("get_object",
+                                         Params={"Bucket": bucket, "Key": object_key},
+                                         ExpiresIn=expires_in)
+    except Exception:
+        return f"{endpoint_url}/{bucket}/{object_key}"
 
 
 def _download_url(url: str) -> str:
     suffix = os.path.splitext(url.split("?")[0])[1] or ".mp4"
     fd, path = tempfile.mkstemp(prefix="disco_input_", suffix=suffix)
     os.close(fd)
-    if edream_client:
-        edream_client.file_client.download_file(url, path)
-    else:
-        urllib.request.urlretrieve(url, path)
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    with open(path, "wb") as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
     return path
 
 
 def _resolve_video_input(cfg_dict: dict[str, Any]) -> None:
-    source_uuid = cfg_dict.pop("source_dream_uuid", None)
+    cfg_dict.pop("source_dream_uuid", None)
     video_url = cfg_dict.pop("video_init_url", None)
-
-    if source_uuid:
-        if not edream_client:
-            raise RuntimeError("BACKEND_URL/BACKEND_API_KEY required for source_dream_uuid")
-        dream = edream_client.get_dream(uuid=source_uuid)
-        if not dream or not dream.get("original_video"):
-            raise ValueError(f"Dream {source_uuid} has no original_video")
-        cfg_dict["video_init_path"] = _download_url(dream["original_video"])
-    elif video_url:
+    if video_url:
         cfg_dict["video_init_path"] = _download_url(video_url)
 
 
@@ -62,23 +78,6 @@ def _resolve_init_image(cfg_dict: dict[str, Any]) -> None:
     init = cfg_dict.get("init_image", "")
     if init and init.startswith(("http://", "https://")):
         cfg_dict["init_image"] = _download_url(init)
-
-
-def _upload_output(output_path: str, batch_name: str) -> dict:
-    if not edream_client:
-        raise RuntimeError("BACKEND_URL/BACKEND_API_KEY required for output upload")
-    dream = edream_client.file_client.upload_file(
-        output_path,
-        FileType.DREAM,
-        {"name": batch_name},
-    )
-    dream_uuid = dream.get("uuid")
-    dream_detail = edream_client.get_dream(uuid=dream_uuid) if dream_uuid else {}
-    r2_url = (dream_detail.get("original_video") or dream_detail.get("video")) if dream_detail else None
-    return {
-        "dream_uuid": dream_uuid,
-        "r2_url": r2_url,
-    }
 
 
 def handler(job: dict) -> dict:
@@ -112,15 +111,14 @@ def handler(job: dict) -> dict:
         return {"error": "No output produced"}
 
     try:
-        upload = _upload_output(output_path, cfg.batch_name)
+        download_url = _upload_to_r2(str(job.get("id") or uuid.uuid4()), output_path)
     except Exception as exc:
         traceback.print_exc()
-        return {"error": f"Upload failed: {exc}"}
+        return {"error": f"R2 upload failed: {exc}"}
 
     return {
         "status": "success",
-        "dream_uuid": upload["dream_uuid"],
-        "r2_url": upload["r2_url"],
+        "download_url": download_url,
         "seed": result.get("seed"),
         "frames": result.get("frames"),
         "batch_num": result.get("batch_num"),
