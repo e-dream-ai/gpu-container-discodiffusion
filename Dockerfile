@@ -40,7 +40,8 @@ RUN git clone --depth 1 https://github.com/openai/CLIP.git CLIP \
  && git clone --depth 1 https://github.com/alembics/disco-diffusion.git disco-diffusion \
  && git clone --depth 1 https://github.com/princeton-vl/RAFT.git RAFT \
  && mv MiDaS/utils.py MiDaS/midas_utils.py \
- && cp disco-diffusion/disco_xform_utils.py disco_xform_utils.py
+ && cp disco-diffusion/disco_xform_utils.py disco_xform_utils.py \
+ && sed -i 's/    sys.exit()/    pass/' disco_xform_utils.py
 
 RUN pip install --no-cache-dir -e guided-diffusion \
  && pip install --no-cache-dir -e CLIP
