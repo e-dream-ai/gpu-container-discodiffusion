@@ -21,9 +21,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --upgrade pip setuptools wheel
 
 RUN pip install --no-cache-dir \
-        torch==2.0.1+cu121 \
-        torchvision==0.15.2+cu121 \
-        torchaudio==2.0.2+cu121 \
+        torch==2.1.0+cu121 \
+        torchvision==0.16.0+cu121 \
+        torchaudio==2.1.0+cu121 \
         --index-url https://download.pytorch.org/whl/cu121
 
 COPY requirements.txt /tmp/requirements.txt
