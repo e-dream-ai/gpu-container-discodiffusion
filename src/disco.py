@@ -47,6 +47,11 @@ CLIP_DOWNLOAD_ROOT = os.environ.get("CLIP_DOWNLOAD_ROOT", os.path.join(MODEL_DIR
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 device = DEVICE
 
+if DEVICE.type == "cuda":
+    cap = torch.cuda.get_device_capability(DEVICE)
+    if cap == (8, 0) or cap >= (9, 0):
+        torch.backends.cudnn.enabled = False
+
 
 @dataclass
 class Runtime:
