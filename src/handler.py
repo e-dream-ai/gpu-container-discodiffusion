@@ -23,7 +23,19 @@ _PARENT = os.path.dirname(_HERE)
 if _PARENT not in sys.path:
     sys.path.insert(0, _PARENT)
 
+BACKEND_URL = os.environ.get("BACKEND_URL")
+BACKEND_API_KEY = os.environ.get("BACKEND_API_KEY")
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
+
+_edream_client = None
+
+
+def _get_edream_client():
+    global _edream_client
+    if _edream_client is None and BACKEND_URL and BACKEND_API_KEY:
+        from edream_sdk.client import create_edream_client
+        _edream_client = create_edream_client(backend_url=BACKEND_URL, api_key=BACKEND_API_KEY)
+    return _edream_client
 
 
 def _upload_to_r2(job_id: str, file_path: str) -> str:
@@ -68,9 +80,18 @@ def _download_url(url: str) -> str:
 
 
 def _resolve_video_input(cfg_dict: dict[str, Any]) -> None:
-    cfg_dict.pop("source_dream_uuid", None)
+    source_uuid = cfg_dict.pop("source_dream_uuid", None)
     video_url = cfg_dict.pop("video_init_url", None)
-    if video_url:
+
+    if source_uuid:
+        client = _get_edream_client()
+        if not client:
+            raise RuntimeError("BACKEND_URL/BACKEND_API_KEY required to resolve source_dream_uuid")
+        dream = client.get_dream(uuid=source_uuid)
+        if not dream or not dream.get("original_video"):
+            raise ValueError(f"Dream {source_uuid} has no original_video")
+        cfg_dict["video_init_path"] = _download_url(dream["original_video"])
+    elif video_url:
         cfg_dict["video_init_path"] = _download_url(video_url)
 
 
