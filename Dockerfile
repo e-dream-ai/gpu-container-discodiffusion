@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 AS base
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_PREFER_BINARY=1 \
@@ -21,10 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --upgrade pip setuptools wheel
 
 RUN pip install --no-cache-dir \
-        torch==2.0.1+cu118 \
-        torchvision==0.15.2+cu118 \
-        torchaudio==2.0.2+cu118 \
-        --index-url https://download.pytorch.org/whl/cu118
+        torch==2.0.1+cu121 \
+        torchvision==0.15.2+cu121 \
+        torchaudio==2.0.2+cu121 \
+        --index-url https://download.pytorch.org/whl/cu121
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
