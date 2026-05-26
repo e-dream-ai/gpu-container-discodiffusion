@@ -4,6 +4,8 @@ RunPod serverless container for **Disco Diffusion v5.2 (warp)** — CLIP-guided
 diffusion with RAFT optical-flow video stylization, originally by Sxela, Somnai,
 gandamu, zippy, and the Disco Diffusion community.
 
+Modified for infinidream 2026.05
+
 ## What it does
 
 Three animation modes:
