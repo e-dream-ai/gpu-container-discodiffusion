@@ -17,8 +17,8 @@ class DiscoConfig:
     use_checkpoint: bool = True
     use_fp16: bool = True
 
-    width: int = 1280
-    height: int = 768
+    width: int = 512
+    height: int = 512
     steps: int = 250
     eta: float = 0.3
 
